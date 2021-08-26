@@ -1,0 +1,73 @@
+---
+title: "README"
+author: "Ely Barbaza"
+date: "19/08/2021"
+output: github_document
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "tools/"
+)
+```
+
+The Benford Law (`Benford.Law`) package provides basic tools in order to confirm compliance of a data to Benford Law.
+The main purpose of the package is to have a basic understanding of Benford Law and to easily apply it.
+
+## Example usage
+
+The `Benford.Law` package comes with the "U.S President" dataset. This latter can be found at the [MIT Election Data Science Lab website](https://electionlab.mit.edu/data).
+It contains contains US presidential election data from 1976 to 2020 by county.
+
+Here we will give an example using the whole dataset (4,287 observations) from the election data.
+The first step will be to load the package and to import the data.
+
+
+```{r}
+library(benford-ely) # loads package 
+
+ # loads data
+raw2 = read.csv("data/countypres_2000-2020.csv",
+               na.strings=c("","NA"))
+
+# convert to tibble
+data2 = raw2 %>%
+  as_tibble()
+```
+
+When your data is loaded, select the column with the numbers that you want to analyze.
+Then the function will automatically print all the statistics that you need.
+The default digit is "1".
+
+```{r}
+# first digit analysis
+first = data2 %>% 
+  select(candidatevotes) %>%
+  benfordfct()
+
+first
+```
+
+
+It shows the lower bound and upper bound of the expected proportion with the expected benford proportion itself.
+Then, the chisquare value, critical value, df and p-value. Just below it shows the ssd value.
+Finally it computes the zstat values for each digit.
+
+
+You can choose to only print the stat that you need. For example here below the uniquely the chi2 critical value.
+
+```{r}
+# first digit chi2 critical value
+first$chi2$chisq
+
+```
+
+
+
+
+
+
+
+
