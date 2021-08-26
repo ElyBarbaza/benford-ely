@@ -2,7 +2,9 @@
 title: "README"
 author: "Ely Barbaza"
 date: "19/08/2021"
-output: github_document
+output: 
+  md_document:
+    variant: markdown_github
 ---
 
 ```{r, echo = FALSE}
@@ -27,6 +29,13 @@ The first step will be to load the package and to import the data.
 
 ```{r}
 library(BenfordLaw) # loads package 
+
+# loads other library needed
+library(tidyverse)
+library(ggpubr) # ggarrange
+library(naniar) # replace_with_na_all()
+library(data.table)
+library(stats)
 
  # loads data
 raw2 = read.csv("data/countypres_2000-2020.csv",
