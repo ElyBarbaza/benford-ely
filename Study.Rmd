@@ -22,7 +22,7 @@ fig_height: 4
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-source("~/BenfordLaw/R/benfordfct.R")
+source("~/BenfordLaw/R/main.R")
 ```
 
 
@@ -32,6 +32,7 @@ library(tidyverse)
 library(ggpubr) # ggarrange
 library(naniar) # replace_with_na_all()
 library(data.table)
+library(stats)
 
 # loading raw data
 raw2 = read.csv("data/countypres_2000-2020.csv",
