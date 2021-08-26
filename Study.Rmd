@@ -1,0 +1,653 @@
+---
+title: 'Elections américaines sous la loi de Benford '
+author: "Elysé Barbaza"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 3
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  word_document:
+    toc: yes
+    toc_depth: '3'
+fig_width: 6
+fig_height: 4
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("~/BenfordLaw/R/benfordfct.R")
+```
+
+
+```{r, echo=FALSE}
+# Loading the libraries
+library(tidyverse)
+library(ggpubr) # ggarrange
+library(naniar) # replace_with_na_all()
+library(data.table)
+
+# loading raw data
+raw2 = read.csv("data/countypres_2000-2020.csv",
+               na.strings=c("","NA"))
+
+# convert to tibble
+data2 = raw2 %>%
+  as_tibble()
+
+```
+
+
+# Introduction 
+
+Pour de nombreux séries de nombres de la vie réelle, les fréquences d'apparitions des chiffres significatifs (CS) de celle-ci suivent une loi particulière, la loi de Benford (LDB). Celle-ci a été découverte par ce dernier au cours du siècle dernier et son intérêt aujourd'hui ne fait que croitre.
+
+Voici sa formule pour le premier CS :  $\ P(D=d)= \log(1+ \frac{1}{d})$ (d allant de 1 à 9)
+
+Les chiffres d'élections ne dérogent pas à cette règle et de nombreuses études corroborrent cela. (e.g [1])
+En effet, une non-adéquation à la loi de Benford des résultats de votes peuvent suggérer une fraude ou manipulation potentielle de celle-ci.
+
+La dernière élection américaine aux présidentielles fut secouée par les accusations de fraudes de Donald Trump, un candidat en lice. 
+
+Ces accusations concernaient plusieurs allégations : 
+
+- une montée soudaine et sans explications des voix de l'opposition (Biden)
+- un retournement de vote de Trump en faveur de Biden
+- plus de votes enregistrés que d'électeurs inscrits
+- les machines à voter sont la propriété des Démocrates (Biden) et ces derniers ont aurait profité
+- des milliers de personnes mortes ont votés
+
+D'après ces accusations, les données auraient donc été manipulés en faveur de Biden et/ou en défaveur de Trump. Si cela se confirme un pattern suspicieux devrait se retrouver sur les votes de Biden et/ou Trump.
+
+L'objectif de cette étude sera de vérifier (en parallèle) la conformité à la loi de Benford des données d'élections des deux principaux candidats. 
+Une première description des données sera effectué pour obtenir une vue d'ensemble. Ensuite, les statistiques les plus courants seront réalisé concernant les votes des deux candidats. 
+
+Avec deux hypothèses principales : Est ce que le jeu de données est conforme à la loi de Benford? À quelle distance se trouve le jeu de données comparé à loi de Benford?
+
+Après avoir analysé les résultats, une discussion et une conclusion concernant la validité des méthodes utilisées sera effectué.
+
+Le jeu de données sur lequel se basera l'étude vient du site internet ["MIT Election Data Science Lab"](https://electionlab.mit.edu/data). Ce fichier contient les données d'élections présidentielles des États-unis de 1976 à 2020 par comté.
+
+Voici l'en tête du jeu de données complet (72,617 observations et 12 variables) :
+
+```{r, echo=FALSE}
+data2
+```
+
+
+# Littérature 
+
+
+La première étape de ce type d'étude est de vérifier si le type de donnée (ici d'élections), suivent en général la loi de Benford (LB). Cela si il n'y a pas d'irrégularités bien entendu.
+
+Les critères principaux permettant à un jeu de données d'avoir un comportement Benfordien sont :
+
+- L'hétérogénité de la génération des nombres.
+- L'étendue de l'ordre de grandeur des nombres.
+- L'asymétrie des données de l'histogramme penchant majoritairement vers la gauche avec une queue proéminente tombant vers la droite (figure 1).
+
+
+```{r, echo=FALSE}
+# Perfect Benford Set Histogram with N=5000
+g=as_tibble(data.frame(digit = as.character(c(1:9)),n=round(log10(1 + 1/(1:9))*5000))) %>%
+  ggplot(., aes(x=digit,y=n)) +
+  geom_col() +
+  theme(
+        #axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) 
+
+h=as_tibble(data.frame(digit = as.character(c(10:99)),n=round(log10(1+1/(10:99))*5000))) %>%
+  ggplot(., aes(x=digit,y=n)) +
+  geom_col() +
+  theme(
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+# merge both plots
+both = ggarrange(g, h)
+fig1 = annotate_figure(both,
+                top = text_grob("Histogramme sous la loi de Benford", color = "brown", face = "bold", size = 14),
+                bottom = text_grob("Chiffre signficatif : 1 et 1&2 \n N = 5000 avec fréquences exactes de la LB",
+                                  hjust = 1, x = 1, face = "italic", size = 10),
+                fig.lab = "Figure 1",fig.lab.face = "bold",fig.lab.pos = "bottom.left")
+
+fig1
+```
+
+
+
+La combinaison de ces facteurs n'est pas une garantie de comportement Benfordien, mais c'est une forte indication
+que cela puisse être le cas.
+
+Hill [2] stipule cela : 
+"La loi de Benford tient asymptotiquement si les nombres sont générés comme des mélanges non biaisés de différentes populations et que plus le mélange est important, meilleure est la population."
+Pericchi & Torres [3], ajoute ceci : "Les modèles de populations de vote réalistes ne devraient pas être homogènes sur chaque unité électorale mais devraient être des mélanges de différentes populations.
+
+L'hétérogénéité du nombre et des types d'habitants des comtés américains remplit ce critère.
+
+Un autre caractère associé plus il y a différents ordre de grandeur entre les nombres, plus la donnée analysée se conforme à la LB.
+Les données d'éléctions suivent ce modèle en général si il n'y a pas de limite de votes par urnes. 
+Cela est le cas de la procédure d'éléctions aux États-Unis.
+
+C'est ainsi que le jeu de données choisit pour l'analyse contient les votes des candidats par comté et non par état.
+Cela afin d'avoir une plus grande d'ordre de grandeur. Et dans le même temps obtenir un plus grand nombre d'observations. 
+
+Pour plus de simplicité (notamment pour l'analyse du premier-deuxième chiffre significatif), les nombres inférieurs à 10 ont été supprimés.
+Il est assez évident que cela ne remet nullement en cause la pertinence de l'analyse étant donnée la provenance des nombre (données d'éléctions états-uniennes).
+
+Voici l'en-tête des deux jeux de données qui seront étudiés (Trump et Biden respectivement), n étant le nombre de votes : 
+
+
+```{r , echo=FALSE}
+# extracting the data needed for trump
+trump = data2 %>%
+  filter(year == "2020",candidate == "DONALD J TRUMP",candidatevotes > 10) %>%
+  group_by(county_name,county_fips) %>%
+  tally(candidatevotes) %>%
+  ungroup()
+
+# extracting the data needed for biden
+biden = data2 %>%
+  filter(year == "2020",candidate == "JOSEPH R BIDEN JR",candidatevotes > 10) %>%
+  group_by(county_name,county_fips) %>%
+  tally(candidatevotes) %>%
+  ungroup()
+
+# merge both to perform some calculations
+both = trump %>%
+  inner_join(biden,c("county_name","county_fips")) %>%
+  rename(trump = n.x,
+         biden = n.y)
+
+# finding the percentiles
+#both %>%
+#  select(biden) %>%
+#  as_vector() %>%
+#  quantile(c(.01, .99))
+
+```
+
+
+
+Voici les comtés non inclus dans l'analyse :
+
+
+
+```{r , echo=FALSE}
+# extract counties that will not be included in the analysis
+trump %>%
+  anti_join(biden,c("county_name","county_fips"))
+
+# removing these counties from trump dataset 
+trump = trump %>%
+  semi_join(biden,c("county_name","county_fips"))
+
+```
+
+
+
+Il y a donc 3153 nombre d'observations totales.
+Les votes de Trump s'étendent sur l'intervalle [59;1145530].
+Les votes de Biden s'étendent sur l'intervalle [16;3028885].
+
+Les votes des deux candidats s'étendent sur 4 et 5 ordres de grandeurs respectivement. (Formule OG: log10(max/min)).
+Les votes des deux candidats s'étendent sur 2.7 et 3.7 ordres de grandeurs robuste respectivement. (Formule OGR : log10(percentile99/percentile1)).
+
+La valeur d'ordre de grandeur robuste (OGR) recommandé pour atteindre la conformité à la LB est d'environ 3.
+Ce qui est atteint par l'étendue de votes de Biden et quasiment atteint par celui de Trump (> 2.5).
+Nous considérons ici que ce critère est atteint.
+
+Voici ci-dessus l'histogramme des votes de Trump et Biden. Pour une meilleure inteprétation visuelle, seuls les données compris dans l'intervalle de percentile [5% , 95%] sont pris en compte.
+
+
+```{r , echo=FALSE}
+# histogram of trump 
+
+hist_trump = trump %>%
+  filter(n > 1043, n < 96714) %>%
+  ggplot(., aes(n)) +
+  geom_histogram() +
+  ggtitle("Trump")
+
+# histogram of biden
+biden_hist = biden %>%
+  filter(n > 254, n < 121828) %>%
+  ggplot(., aes(n)) +
+  geom_histogram() +
+  ggtitle("Biden")
+
+# merge both plots
+both4 = ggarrange(hist_trump,biden_hist)
+fig2 = annotate_figure(both4,
+                top = text_grob("Histogramme votes Trump & Biden", color = "brown", face = "bold", size = 14),
+                fig.lab = "Figure 2",fig.lab.face = "bold",fig.lab.pos = "bottom.left")
+fig2
+```
+
+
+On remarque que les deux histogrammes ont une asymétrie avec un penchant extrême vers la gauche. Cette asymétrie est plus forte que la loi de Benford. Cela est dû à la présence de comtés ayant une population bien supérieur à la moyenne nationale.
+
+
+# Statistique descriptive
+
+
+Voici l'histogramme des votes du premier chiffre significatif de Trump et Biden. La figure est accompagné d'une ligne représentant un jeu de données ayant le même nombre d'observations mais avec les fréquences exactes de la loi de Benford.
+
+
+```{r , echo=FALSE}
+# compute proportion of first-two digits
+first_two2 = data.frame(digit = c(1:9), prop = round((log10(1 + 1/(1:9))*3153))) %>%
+  as_tibble()
+
+# extracting the first digit counts as a table
+trump_vec = as.vector(t(trump %>% 
+                          select(n)))
+
+trump_table = as.numeric(substr(trump_vec, 1, 1)) %% 10 %>%
+  table()
+
+# histogram of trump digits
+trump_hist = trump_table %>%  
+  as_tibble() %>%
+  rename(digit = ".") %>%
+  ggplot(., aes(x=digit,y=n)) +
+  geom_col() +
+  ggtitle("Trump") + 
+  geom_line(first_two2,mapping=aes(x=digit,y=prop))
+
+# the same for biden 
+biden_vec = as.vector(t(biden %>% 
+                          select(n)))
+
+biden_table = as.numeric(substr(biden_vec, 1, 1)) %% 10 %>%
+  table()
+
+biden_hist = biden_table %>%
+  as_tibble() %>%
+  rename(digit = ".") %>%
+  ggplot(., aes(x=digit,y=n)) +
+  geom_col() + 
+  ggtitle("Biden") +
+  geom_line(first_two2,mapping=aes(x=digit,y=prop))
+
+# plotting side by side
+both2 = ggarrange(trump_hist,biden_hist)
+fig3 = annotate_figure(both2,
+                top = text_grob("Histogramme du premier chiffre significatif", color = "brown", face = "bold", size = 14),
+                fig.lab = "Figure 3",fig.lab.face = "bold",fig.lab.pos = "bottom.left")
+
+fig3
+
+# add benford line to the plots
+# add second and first-two digits plots
+
+```
+
+
+
+A première vue les deux graphiques semblent globalement suivre le pattern de la loi de Benford.
+On aperçoit cependant de légers écarts. Sur le graphique de Trump, les chiffre 2 et 9 sont un peu en dessous des valeurs attendus. Et les chiffre 5,6 et 8 sont très légérement au dessus.
+
+Sur le graphique de Biden, les écarts sont plus forts que celle de Trump mais ceux-ci restent assez léger. Notamment avec le chiffre 4 qui est au dessus de la variable attendu. Les chiffres 5,7 et 9 eux sont faiblement en dessous.
+L'analyse visuelle du premier chiffre significatif ici ne montre pas une non-conformité à la LB. 
+Cependant, cette analyse ne démontre en rien la conformité à la LB.
+
+Nous passons maintenant à la visualisation du premier-deuxième chiffre significatif.
+Il est d'ailleurs suffisant d'uniquement d'analyser le premier-deuxième chiffre significatif. 
+Celui-ci contenant l'information des deux premiers chiffres significatifs :
+
+
+
+```{r , echo=FALSE, fig.height=10}
+# first-two digit test
+
+# compute proportion of first-two digits
+first_two = data.frame(digit = c(1:90), prop = round((log10(1+1/(10:99))*3153))) %>%
+  as_tibble()
+
+# extracting the first digit counts as a table
+trump_table = as.numeric(substr(trump_vec, 1, 2)) %% 100 %>%
+  table()
+
+# histogram of trump digits
+trump_hist_2 = trump_table %>%
+  as_tibble() %>%
+  rename(digit = ".") %>%
+  ggplot(., aes(x=digit,y=n)) +
+  geom_col() +
+  ggtitle("Trump") +
+  scale_x_discrete(breaks = c(seq(10,99,by =10))) +
+  geom_line(first_two,mapping=aes(x=digit,y=prop))
+
+# extracting the first digit counts as a table
+biden_table = as.numeric(substr(biden_vec, 1, 2)) %% 100 %>%
+  table()
+
+# histogram of trump digits
+biden_hist_2 = biden_table %>%
+  as_tibble() %>%
+  rename(digit = ".") %>%
+  ggplot(., aes(x=digit,y=n)) +
+  geom_col() +
+  ggtitle("Biden") +
+  scale_x_discrete(breaks = c(seq(10,99,by =10))) +
+  geom_line(first_two,mapping=aes(x=digit,y=prop))
+  
+# merge and annotating both plots
+both3 = ggarrange(trump_hist_2,biden_hist_2, nrow = 2, ncol = 1)
+fig4 = annotate_figure(both3,
+                top = text_grob("Histogramme premier-deuxieme CS", color = "brown", face = "bold", size = 14),
+                fig.lab = "Figure 4",fig.lab.face = "bold",fig.lab.pos = "bottom.left")
+fig4
+
+```
+
+
+Ici encore, globalement on retrouve le pattern d'asymétrie à gauche de la loi de Benford. Cependant on remarque la présence de nombreux chiffres qui sont au dessus ou en dessous de leur valeur attendue.
+
+Sur le graphique de Trump, une dizaine de chiffres dépasse la ligne. Les plus significatifs sont le 56,74,80,83,87, ces chiffres ont environ un tiers de trop. 
+
+Une dizaine de chiffre se trouvent également en dessous de cette ligne. Les plus significatifs sont le 52,89 dont le nombre est quasiment diminué de moitié. On notera également les chiffres 33,63,78 qui se trouvent diminués d'environ un tiers.
+
+Sur le graphique de Biden, une dizaine de chiffres dépasse la ligne. Les plus marquants sont le 43,59,82,89, dont on retrouve un tiers en trop.
+
+Et commme son homologue républicain, on retrouve encore une dizaine de chiffre en deça de la ligne. Cependant ici, un chiffre se démarque, le chiffre 94 qui n'est qu'à un tiers de son compte attendu.
+Les chiffres 52,55,77,86,88 ont eux moitié moins.
+
+
+
+# Méthodes
+
+Afin de répondre à nos problématiques de l'introduction, nous procéderons comme suit pour les données des deux candidats. :
+
+-Application des tests statistiques afin de vérifier si elles sont en désaccord avec la loi de Benford.
+-Application des tests statistiques permettant de mesurer leur distance comparé à la loi de Benford.
+
+Cette dichotomie entre ces deux objectifs est suggéré par Kossovsky [4]. En effet, selon lui, ces deux notions sont différentes et ont donc besoin d'être conceptuellement différenciés :
+
+Le terme de conformité répond de manière binaire (oui ou non) au fait de savoir si la donnée est Benford.
+C'est le test le plus courant effectué par les différents analystes dans la littérature.
+Nous choisirons ici d'utiliser parmi tout les tests de conformités disponibles, le test du chi2 de par son objectif qui aligné au notre. Mais aussi de par son abondance dans les études benfordienne similaires.
+
+Voici la formule du chi2 : $\ Chi-Square= N*\sum \frac{(Observed - Theory)^2}{Theory}$
+
+La principale difficulté de celle-ci est de satisfaire les hypothèses sous-jacentes à son utilisation dans le contexte de la conformité. 
+
+Le terme de comparaison lui intervient car tout les données de la vie réelle (non manipulées) ne se conforme pas à la loi de Benford. Ce terme se réfère à "un ensemble de données particulier avec sa propre configuration particulière". Et l'objectif est de déterminer à quel point la donnée est loin/proche de Benford.
+
+Nous choisirons ici d'utiliser le SSD (somme des écarts au carré) en faveur du MAD (Moyenne des écarts absolus).
+Cela pour les deux raisons évoqués par Kossovsky [4] qui sont : une plus grande simplicité d'interprétation visuelle et une base mathématique plus simple. 
+
+La principale difficulté des tests de distances est de placer les seuils de tolérances. Cerqueti et Maggi [5] dans un récent article nous en proposent pour les chiffres significatifs qui nous intéressent (tableau 1). Ces derniers ont été trouvés grâce à des recherches sur des données de la vie réelle et mathématique abstraites.
+
+Voici comment est calculé le SSD :  $\ SSD = \sum((100) * Observed - (100) * Theory)^2 $
+
+
+**Tableau 1 - Seuil de tolérance SSD**
+
+| **DIGIT** | **Quasi Benford Parfait** |**Benford Acceptable**| **Limite Benford** | **Non Benford** |
+|:-------------------:|:-------------------:|:-------------:|:---------:|:---------:|
+| **1ER**              | < 2     |  2 - 25 | 25 - 100 | > 100 |
+| **2ÈME**             | < 2     |  2 - 10 | 10 - 50  | > 50  |
+| **1ER-2ÈME**         | < 2     |  2 - 10 | 10 - 50  | > 50  |
+
+
+
+Enfin, le z-statistic test sera utilisé en complément du chi2. En effet, à l'opposée de ce dernier qui prend en compte tout les chiffres en même temps, le z test mesure chaque chiffre un à un. Son objectif est de tester si la fréquence d'un chiffre en particulier diffère significativement de ce qu'il est attendu sous la LDB. 
+
+Sa formule est la suivante :  $\ zstat = \frac{|Observed - Theory| - (1/2N)}{\sqrt\frac{Theory(1-Theory)}{N}} $
+
+Suivant la littérature (Nigrini [6], Grammatikos & Papanikolaou [7]) , ces seuils de tolérance sont appliqués afin de rejetter l'hypothèse nulle : 
+Une statistique z de : 2,57 indique une p-valeur de 0,01 ; 1,96 indique une p-valeur de 0,05 ; et 1,64 suggère une p-valeur de 0,10.
+
+# Tests & Résultats 
+
+Voici l'application de ces tests aux premier, deuxième et premier-deuxième chiffre significatif :
+
+
+```{r , echo=FALSE}
+# computing the different digits for both candidates
+
+# Compute first digit
+trump_d1 = trump %>%
+  select(n) %>%
+  benfordfct(digit =1)
+
+biden_d1 = biden %>%
+  select(n) %>%
+  benfordfct(digit =1)
+
+# Compute second digit
+trump_d2 = trump %>%
+  select(n) %>%
+  benfordfct(digit =2)
+
+biden_d2 = biden %>%
+  select(n) %>%
+  benfordfct(digit =2)
+
+# Compute first-two digits
+trump_d12 = trump %>%
+  select(n) %>%
+  benfordfct(digit =12)
+
+biden_d12 = biden %>%
+  select(n) %>%
+  benfordfct(digit =12)
+
+
+```
+
+
+Le tableau résumant les proportions empiriques et théoriques du premier chiffre significatif des deux candidats est ainsi obtenu ci-dessous. Les intervalles de confiance des valeurs théoriques sont dans le tableau en lieu et place des simples proportions théoriques. Ces intervalles de confiance ont été calculés grâce aux travaux de Nigrni & Mitteraier [8] avec un alpha égale à 0.05.
+
+
+**Tableau 2 - Valeurs théoriques et observés du premier CS pour Trump et Biden**
+
+| **DIGIT** | **OBSERVÉ TRUMP** | **THÉORIQUE IC** | **OBSERVÉ BIDEN** |
+|:---------:|:-----------------:|:--------------:|:------------------:|
+| **1**     | 0.295             |  [0.285 ; 0.317]         |  0.295             | 
+| **2**     | 0.164             |  [0.163 ; 0.189]         |  0.181             | 
+| **3**     | 0.120             |  [0.113 ; 0.137]         |  0.128             | 
+| **4**     | 0.098             |  [0.087 ; 0.107]         |  0.115             | 
+| **5**     | 0.085             |  [0.070 ; 0.089]         |  0.065             | 
+| **6**     | 0.072             |  [0.058 ; 0.076]         |  0.065             | 
+| **7**     | 0.060             |  [0.050 ; 0.066]         |  0.054             | 
+| **8**     | 0.055             |  [0.044 ; 0.059]         |  0.052             | 
+| **9**     | 0.051             |  [0.039 ; 0.053]         |  0.044             | 
+
+
+Les résultats du tableau 2, montre que toutes les valeurs de Trump sont bien comprises dans les valeurs théoriques attendues. 
+Ce n'est pas le cas pour Biden, en effet les chiffres 4 et 5 se trouvent en en dehors de leurs intervalles respectives.
+
+On procède alors à la réalisation du test de chi2 et de la mesure de SSD.
+On obtient les résultats suivants pour Trump :
+
+
+**Tableau 3 - Résultats du test statistique chi2 et de SSD de Trump**
+
+| **DIGIT**            | **CHI2 (p-valeur)** | **CHI2 (DL)** | **SSD**   |
+|:-------------------:|:-------------------:|:-------------:|:---------:|
+| **1ER**              | 9.564 (0.297)       |  8            | 3.249     |
+| **2ÈME**             | 4.934 (0.840)       |  9            | 1.577     |
+| **1ER-2ÈME**         | 101.968 (0.164)     |  89           | 3.502     |
+
+
+Le second chiffre significatif a la p-valeur la plus haute (0.84) suivit du premier chiffre (0.29) et du premier-deuxieme (0.164).
+On constate que l'hypothèse alternative du CHI2 pour les trois chiffes significatifs est assez largement rejeté. Les p-valeurs sont bien au dessus du seuil de 5%.
+Selon ce test, les données de Trump ne sont pas en désaccord avec la loi de Benford. 
+
+Les valeurs du SSD des trois chiffres sont très petits. Le second est même inférieur à 2 (1.58) et selon la classification du tableau 3, il est considéré comme étant presque parfaitement Benford.
+Le premier et le premier-deuxième sont eux autour de 3 (respectivement 3.25 et 3.5), ils sont considéré comme assez proche et acceptable de Benford.
+
+Les résultats du chi2 montre que les données de Trump ne sont pas en désaccord avec Benford. Mais que justement, et grâce au SSD, ceux-ci sont plutôt très proches de la loi.
+Cela suggère que les résultats d'éléctions de votes de Trump n'ont subi aucune manipulation/fraude détéctable par la loi de Benford.
+
+Les résultats de Biden sont les suivants :
+
+
+**Tableau 4 - Résultats du test statistique chi2 et de SSD de Biden**
+
+| **DIGIT**            | **CHI2 (p-valeur)** | **CHI2 (DL)** | **SSD**   |
+|:--------------------:|:-------------------:|:-------------:|:---------:|
+| **1ER**              | 20.943 (0.007***)   |  8            | 6.224     |
+| **2ÈME**             | 6.853 (0.652)       |  9            | 2.031     |
+| **1ER-2ÈME**         | 102.544 (0.154)     |  89           | 3.04      |
+
+
+
+Ici, on constate que l'hypothèse alternative du CHI2 pour le deuxième et premier-deuxième chiffes significatif est assez largement rejeté. Les p-valeurs sont bien au dessus du seuil de 5%.
+Cependant, le premier chiffre est rejeté par le test du chi2. En effet sa p-valeur est largement en dessous du seuil de 5%, et même du seuil de 1% (0.007).
+Selon ce test, les données de Biden pour le premier CS est en désaccord avec la loi de Benford. 
+
+Afin de tenter de déceler plus précisément quels chiffres seraient problématiques sur le premier CS, l'usage du z-statistique est effectué. 
+
+Voici les résultats du z-statistic obtenus sur le premier CS de Biden :
+
+
+**Tableau 5 - Résultats du test statistique z de Biden**
+
+| **DIGIT** | **Z-VALUE** | 
+|:---------:|:-----------:|
+| **1**     | 0.724       | 
+| **2**     | 0.715       |
+| **3**     | 0.569       | 
+| **4**     | 3.428***    | 
+| **5**     | 2.846***    |
+| **6**     | 0.469       |
+| **7**     | 0.864       |
+| **8**     | 0.260       | 
+| **9**     | 0.492       | 
+
+
+Selon les seuils précédemment décrit dans le chapitre Méthode, les chiffres 4 & 5 (respectivement 3.43 & 2.85) sont rejeté au seuil d'acceptance de 1%. 
+Ce sont les chiffres qui ont été visuellement remarqués sur la figure 3 et qui étaient en dehors des intervalles de confiances pour les valeur théoriques du tableau 2 . 
+Le 4 a environ 1.8% de plus que la proportion attendu et le 5 a 1.4% de moins que la proportion attendu. Rapportés à la valeur de chaque proportion théorique, les différences sont d'environ 16% et 18% respectivement.
+
+Concernant les valeurs du SSD, on remarque comme pour ceux de Trump que les trois chiffres sont assez petits. En effet ils sont tous inférieurs à 7 (respectivement 6.22, 2.03 et 3.04). Selon la classification, ils sont considérés comme assez proche et donc acceptable pour la LBD.
+
+Les résultats du chi2 et du SSD pour le premier chiffre sont assez contradictoires. Tandis que le premier rejette largement l'hypothèse nulle de conformité à Benford. Le deuxième montre que celle-ci est plutôt assez proche de Benford et est donc largement acceptable.
+
+Selon l'analyse du premier chiffre par le chi2, les données du premier chiffre suggère une possible manipulation des données de Biden. 
+Cependant d'après le SSD, les données de celui-ci sont assez proche et sont donc largement acceptables par la LDB. 
+Cette contradiction nous amène à nous questionner sur les hypothèses de départ dans le cadre de l'utilisation de ces tests.
+
+En regard des résultats du chi2, du z-statistique et des intervalles de confiance, les chiffres 4 & 5 du premier CS peut être sujettes à une investigation plus précises. 
+En passant à l'analyse du premier-deuxieme CS, on remarque que les chiffres 40,43,51,59 et 94 sont rejetés par la valeur critique du z-statistique.
+Les quatre premiers chiffres cités sont en cohérences avec les valeurs significatives des chiffres 4 & 5.
+Une recherche plus poussée concernant les procédures électorales des comtés en question peuvent être menés.
+
+
+
+```{r , echo=FALSE}
+# extract only the countys wanted
+quatre = biden %>% 
+  filter(as.numeric(substr(n, 1, 1)) %% 10 == 4)
+
+cinq = biden %>% 
+  filter(as.numeric(substr(n, 1, 1)) %% 10 == 5)
+
+quatre.zero = biden %>% 
+  filter(as.numeric(substr(n, 1, 2)) %% 100 == 40)
+
+quatre.trois = biden %>% 
+  filter(as.numeric(substr(n, 1, 2)) %% 100 == 43)
+
+cinq.un = biden %>% 
+  filter(as.numeric(substr(n, 1, 2)) %% 100 == 51)
+
+cinq.neuf = biden %>% 
+  filter(as.numeric(substr(n, 1, 2)) %% 100 == 59)
+
+quatre.zero %>%
+  arrange(-n)
+
+```
+
+
+
+# Discussions et Conclusion
+
+Cette contradiction entre les résultats du chi2 et ceux du SSD pour les votes de Biden nous pousse à scruter les
+hypothèses de départ du premier test. 
+
+Cette question, sous loi de Benford est très bien analysé et resumé par l'article de Kossovsky [4].
+Le test de chi2 est dans la littérature, reputé être assez "sensible"" sur les jeu de données à gros volume, à cause
+de son terme N. 
+Kossovsky conteste cette qualification de sensibilité. Pour lui, il est préférable de vérifier si les hypothèses
+sous-jacentes à celles-ci sont bien satisfaites dans le cadre Benfordien.
+
+Et en effet, le chi2 repose sur l'hypothèse par lequel elle se réfère à un échantillon de taille N, pris au hasard
+dans une population infinie supposée posséder exactement la propriété de Benford. Le processus aléatoire de
+selection des N valeurs se fait de manière totalement indépendent les unes des autres. 
+
+Selon lui, en général, les données de la vie réelle ne suivent pas ce type de procédé. 
+D'une part, il est rare d'avoir en main une population parente infinie qui suivrait exactement la propriété de
+Benford et dont on pourrait sélectionner aléatoirement les valeurs N. 
+D'autre part, dans le cas où cette population existerait, les N valeurs de la vie réelle ne suivent presque jamais
+ce processus aléatoire de sélection. 
+Dans le cadre de cette donnée électorale, la population votantes états-uniennes n'est pas infini et ne suit pas de
+manière parfaitement exacte la LDB. 
+De plus les habitudes de votes des habitants sont hautements dépendants de facteurs tels que les campagnes
+électorales, le contexte de l'actualité, le contexte de la région etc...
+
+A la lumière de cette hypothèse d'échantillonage assez largement non satisfaite, l'usage du chi2 dans ce cadre
+électorale semble être erronée.
+Selon ce même auteur, une mesure de distance semble être plus approprié pour les données réelles. C'est le cas des
+données de cette éléction américaine.
+
+Tout les tests effectués n'ont permis d'établir aucun résultat significatif concernant les votes de Trump. Il n'y a
+aucune raison d'établir un doute sur une manipulation en défaveur des résultats de ce dernier.
+Concernant les résultats de Biden, les tests de conformités (chi2 et z-statistique) et les intervalles de confiance
+signalent un doute quant à quelques chiffres sur le premier CS. 
+Ces significances sont cependant nuancées par les résultats du SSD. Ce dernier indique largement que les données de
+Biden suivent assez bien la loi de Benford. 
+De plus, comme évoqués précedemment, le test du chi2 est de plus en plus controversé quant à son utilisation sur les
+données de la vie réelle. En effet, ces hypothèses de départ sont assez difficile à satisfaire pour ce type de
+donnée.
+
+Il n'y a donc aucune raison de corroborer les accusations de fraude électorales sur les données de Biden. La loi de
+Benford ici, ne nous permet d'indiquer une manipulation électorale ni sur Trump, ni sur Biden.
+De multiples interrogations reste quant à son l'utilisation pour détecter les fraudes électorales (voire [1]).
+Cependant, La LB qui ne que gagner en popularité ces dernières décennies de par sa curiosité mathématique et son
+application à la vie réelle. Elle n'est qu'à son crépuscule et son potentiel reste assez grand.
+
+
+
+# Annexe 
+
+Ressources citées :
+
+1. Fernández-Gracia & Lucas Lacasa, "Bipartisanship Breakdown, Functional Networks, and Forensic Analysis in Spanish 2015 and 2016 National Elections" [2018](https://www.hindawi.com/journals/complexity/2018/9684749/#forensic-analysis)
+
+2. Hill T., “Base-invariance implies Benford’s law” [1995](https://www.semanticscholar.org/paper/Base-Invariance-Implies-Benford%27s-Law-Hill/6997052a48e0a399ab1ae7b82c6b83e7e7e35efc)
+
+3. Pericchi & Torres, "Quick Anomaly Detection by the Newcomb--Benford Law, with Applications to Electoral Processes Data from the USA, Puerto Rico and Venezuela" [2012](https://projecteuclid.org/journals/statistical-science/volume-26/issue-4/Quick-Anomaly-Detection-by-the-NewcombBenford-Law-with-Applications-to/10.1214/09-STS296.full)
+
+4. Kossovsky, "On the Mistaken Use of the Chi-Square Test in Benford’s Law" [2021](https://www.mdpi.com/2571-905X/4/2/27/htm)
+
+5. Cerqueti & Maggi, "Data validity and statistical conformity with Benford’s Law" [2021](https://www.researchgate.net/publication/349593474_Data_validity_and_statistical_conformity_with_Benford's_Law)
+
+6. Nigrini, "Benford's Law, Applications for Forensic Accounting, Auditing and Fraud Detection" [2011](http://library.wbi.ac.id/repository/34.pdf)
+
+7. Grammatikos & Papanikolaou, "Applying Benford’s Law to Detect Accounting Data Manipulation in the Banking Industry" [2021](https://link.springer.com/article/10.1007/s10693-020-00334-9)
+
+8. Nigrini & Mittermaier, "The Use of Benford's law as an Aid in Analytical Procedures" [1997](https://www.thefreelibrary.com/The+use+of+Benford%27s+Law+as+an+aid+in+analytical+procedures-a020746462)
+
+
+
+Ressources non citées :
+
+9. Barabesi, Cerasa, Cerioli & Perrotta "On Characterizations and Tests of Benford’s Law" [2021](https://www.tandfonline.com/doi/full/10.1080/01621459.2021.1891927)
+
+10. Kossovsky, Arithmetical Tugs of War and Benford’s Law [2015](https://arxiv.org/pdf/1410.2174.pdf)
+
+11. Reality Check team, "US election 2020: Fact-checking Trump team's main fraud claims" [2020](https://www.bbc.com/news/election-us-2020-55016029)
+
+
