@@ -21,7 +21,7 @@
 ##' benfordfct(data,digit) # generates all the statistics mentionned above
 ##' data is a column dataset number
 ##' digit is by default 1
-##' digit can be in the interval [1:9] which represent its digit
+##' digit is an integer that can be in the interval [1:9] which represent its digit
 ##' and digit can be "12" which represent first-two digits
 
 

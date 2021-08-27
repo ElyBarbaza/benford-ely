@@ -35,7 +35,6 @@ library(tidyverse)
 library(ggpubr) # ggarrange
 library(naniar) # replace_with_na_all()
 library(data.table)
-library(stats)
 
  # loads data
 raw2 = read.csv("data/countypres_2000-2020.csv",

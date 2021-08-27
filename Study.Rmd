@@ -3,15 +3,15 @@ title: 'Elections américaines sous la loi de Benford '
 author: "Elysé Barbaza"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: '3'
   html_document:
     highlight: tango
     number_sections: yes
     theme: united
     toc: yes
     toc_depth: 3
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
   word_document:
     toc: yes
     toc_depth: '3'
@@ -32,7 +32,6 @@ library(tidyverse)
 library(ggpubr) # ggarrange
 library(naniar) # replace_with_na_all()
 library(data.table)
-library(stats)
 
 # loading raw data
 raw2 = read.csv("data/countypres_2000-2020.csv",
@@ -47,31 +46,29 @@ data2 = raw2 %>%
 
 # Introduction 
 
-Pour de nombreux séries de nombres de la vie réelle, les fréquences d'apparitions des chiffres significatifs (CS) de celle-ci suivent une loi particulière, la loi de Benford (LDB). Celle-ci a été découverte par ce dernier au cours du siècle dernier et son intérêt aujourd'hui ne fait que croitre.
+Pour de nombreuses séries de nombres de la vie réelle, les fréquences d'apparition des chiffres significatifs (CS) de celle-ci suivent une loi particulière, la loi de Benford (LB). Celle-ci a été découverte par ce dernier au cours du siècle dernier et son intérêt aujourd'hui ne fait que croitre.
 
 Voici sa formule pour le premier CS :  $\ P(D=d)= \log(1+ \frac{1}{d})$ (d allant de 1 à 9)
 
-Les chiffres d'élections ne dérogent pas à cette règle et de nombreuses études corroborrent cela. (e.g [1])
-En effet, une non-adéquation à la loi de Benford des résultats de votes peuvent suggérer une fraude ou manipulation potentielle de celle-ci.
+Les chiffres d'élections ne dérogent pas à cette règle et de nombreuses études corroborent cela. (e.g [1]) En effet, une non-adéquation à la loi de Benford des résultats de votes peuvent suggérer une fraude ou manipulation potentielle de celle-ci.
 
-La dernière élection américaine aux présidentielles fut secouée par les accusations de fraudes de Donald Trump, un candidat en lice. 
+La dernière élection américaine aux présidentielles fut secouée par les accusations de fraudes de Donald Trump, un candidat en lice.
 
 Ces accusations concernaient plusieurs allégations : 
 
 - une montée soudaine et sans explications des voix de l'opposition (Biden)
 - un retournement de vote de Trump en faveur de Biden
 - plus de votes enregistrés que d'électeurs inscrits
-- les machines à voter sont la propriété des Démocrates (Biden) et ces derniers ont aurait profité
+- les machines à voter sont la propriété des Démocrates (Biden) et ces derniers en auraient profité
 - des milliers de personnes mortes ont votés
 
-D'après ces accusations, les données auraient donc été manipulés en faveur de Biden et/ou en défaveur de Trump. Si cela se confirme un pattern suspicieux devrait se retrouver sur les votes de Biden et/ou Trump.
+D'après ces accusations, les données auraient donc été manipulées en faveur de Biden et/ou en défaveur de Trump. Si cela se confirme, un pattern suspicieux devrait se retrouver sur les votes de Biden et/ou Trump.
 
-L'objectif de cette étude sera de vérifier (en parallèle) la conformité à la loi de Benford des données d'élections des deux principaux candidats. 
-Une première description des données sera effectué pour obtenir une vue d'ensemble. Ensuite, les statistiques les plus courants seront réalisé concernant les votes des deux candidats. 
+L'objectif de cette étude sera de vérifier (en parallèle) la conformité à la loi de Benford des données d'élections des deux principaux candidats. Une première description des données sera effectuée pour obtenir une vue d'ensemble. Ensuite, les statistiques les plus courantes seront réalisées concernant les votes des deux candidats.
 
-Avec deux hypothèses principales : Est ce que le jeu de données est conforme à la loi de Benford? À quelle distance se trouve le jeu de données comparé à loi de Benford?
+Avec deux hypothèses principales : Est-ce que le jeu de données est conforme à la loi de Benford? À quelle distance se trouve le jeu de données comparé à loi de Benford?
 
-Après avoir analysé les résultats, une discussion et une conclusion concernant la validité des méthodes utilisées sera effectué.
+Après avoir analysé les résultats, une discussion et une conclusion concernant la validité des méthodes utilisées seront effectuées.
 
 Le jeu de données sur lequel se basera l'étude vient du site internet ["MIT Election Data Science Lab"](https://electionlab.mit.edu/data). Ce fichier contient les données d'élections présidentielles des États-unis de 1976 à 2020 par comté.
 
@@ -85,13 +82,14 @@ data2
 # Littérature 
 
 
-La première étape de ce type d'étude est de vérifier si le type de donnée (ici d'élections), suivent en général la loi de Benford (LB). Cela si il n'y a pas d'irrégularités bien entendu.
+La première étape de ce type d'étude est de vérifier si le type de donnée (ici d'élections), suit en général la loi de Benford. Cela s’il n'y a pas d'irrégularités bien entendu.
 
-Les critères principaux permettant à un jeu de données d'avoir un comportement Benfordien sont :
+Les critères principaux permettant à un jeu de données d'avoir un comportement benfordien sont :
 
-- L'hétérogénité de la génération des nombres.
-- L'étendue de l'ordre de grandeur des nombres.
-- L'asymétrie des données de l'histogramme penchant majoritairement vers la gauche avec une queue proéminente tombant vers la droite (figure 1).
+-	L'hétérogénéité de la génération des nombres.
+-	L'étendue de l'ordre de grandeur des nombres.
+-	L'asymétrie des données de l'histogramme penchant majoritairement vers la gauche avec une queue proéminente tombant vers la droite (figure 1).
+
 
 
 ```{r, echo=FALSE}
@@ -123,24 +121,18 @@ fig1
 
 
 
-La combinaison de ces facteurs n'est pas une garantie de comportement Benfordien, mais c'est une forte indication
-que cela puisse être le cas.
+La combinaison de ces facteurs n'est pas une garantie de comportement benfordien, mais c'est une forte indication que cela puisse être le cas.
 
-Hill [2] stipule cela : 
-"La loi de Benford tient asymptotiquement si les nombres sont générés comme des mélanges non biaisés de différentes populations et que plus le mélange est important, meilleure est la population."
-Pericchi & Torres [3], ajoute ceci : "Les modèles de populations de vote réalistes ne devraient pas être homogènes sur chaque unité électorale mais devraient être des mélanges de différentes populations.
+Hill [2] stipule cela : "La loi de Benford tient asymptotiquement si les nombres sont générés comme des mélanges non biaisés de différentes populations et que plus le mélange est important, meilleure est la population." Pericchi & Torres [3], ajoutent ceci : "Les modèles de populations de vote réalistes ne devraient pas être homogènes sur chaque unité électorale mais devraient être des mélanges de différentes populations.”
 
 L'hétérogénéité du nombre et des types d'habitants des comtés américains remplit ce critère.
 
-Un autre caractère associé plus il y a différents ordre de grandeur entre les nombres, plus la donnée analysée se conforme à la LB.
-Les données d'éléctions suivent ce modèle en général si il n'y a pas de limite de votes par urnes. 
-Cela est le cas de la procédure d'éléctions aux États-Unis.
+Un autre caractère associé est que plus il y a différents ordres de grandeur entre les nombres, plus la donnée analysée se conforme à la LB. Les données d'élections suivent ce modèle en général s’il n'y a pas de limite de votes par urne. Cela est le cas de la procédure d'élections aux États-Unis.
 
-C'est ainsi que le jeu de données choisit pour l'analyse contient les votes des candidats par comté et non par état.
-Cela afin d'avoir une plus grande d'ordre de grandeur. Et dans le même temps obtenir un plus grand nombre d'observations. 
+C'est ainsi que le jeu de données choisi pour l'analyse contient les votes des candidats par comté et non par Etat, cela afin d'avoir un plus grand ordre de grandeur et dans le même temps obtenir un plus grand nombre d'observations.
 
-Pour plus de simplicité (notamment pour l'analyse du premier-deuxième chiffre significatif), les nombres inférieurs à 10 ont été supprimés.
-Il est assez évident que cela ne remet nullement en cause la pertinence de l'analyse étant donnée la provenance des nombre (données d'éléctions états-uniennes).
+Pour plus de simplicité (notamment pour l'analyse du premier-deuxième chiffre significatif), les nombres inférieurs à 10 ont été supprimés. 
+Il est assez évident que cela ne remet nullement en cause la pertinence de l'analyse étant donnée la provenance des nombres (données d'élections états-uniennes).
 
 Voici l'en-tête des deux jeux de données qui seront étudiés (Trump et Biden respectivement), n étant le nombre de votes : 
 
@@ -200,11 +192,9 @@ Les votes de Biden s'étendent sur l'intervalle [16;3028885].
 Les votes des deux candidats s'étendent sur 4 et 5 ordres de grandeurs respectivement. (Formule OG: log10(max/min)).
 Les votes des deux candidats s'étendent sur 2.7 et 3.7 ordres de grandeurs robuste respectivement. (Formule OGR : log10(percentile99/percentile1)).
 
-La valeur d'ordre de grandeur robuste (OGR) recommandé pour atteindre la conformité à la LB est d'environ 3.
-Ce qui est atteint par l'étendue de votes de Biden et quasiment atteint par celui de Trump (> 2.5).
-Nous considérons ici que ce critère est atteint.
+La valeur d'ordre de grandeur robuste (OGR) recommandée pour atteindre la conformité à la LB est d'environ 3. Ce qui est atteint par l'étendue de votes de Biden et quasiment atteint par celui de Trump (> 2.5). Nous considérons ici que ce critère est atteint.
 
-Voici ci-dessus l'histogramme des votes de Trump et Biden. Pour une meilleure inteprétation visuelle, seuls les données compris dans l'intervalle de percentile [5% , 95%] sont pris en compte.
+Voici ci-dessous l'histogramme des votes de Trump et Biden. Pour une meilleure inteprétation visuelle, seules les données comprises dans l'intervalle des percentiles [5% , 95%] sont prises en compte.
 
 
 ```{r , echo=FALSE}
@@ -232,7 +222,7 @@ fig2
 ```
 
 
-On remarque que les deux histogrammes ont une asymétrie avec un penchant extrême vers la gauche. Cette asymétrie est plus forte que la loi de Benford. Cela est dû à la présence de comtés ayant une population bien supérieur à la moyenne nationale.
+On remarque que les deux histogrammes ont une asymétrie avec un penchant extrême vers la gauche. Cette asymétrie est plus forte que la loi de Benford. Cela est dû à la présence de comtés ayant une population bien supérieure à la moyenne nationale.
 
 
 # Statistique descriptive
@@ -651,4 +641,4 @@ Ressources non citées :
 
 11. Reality Check team, "US election 2020: Fact-checking Trump team's main fraud claims" [2020](https://www.bbc.com/news/election-us-2020-55016029)
 
-
+12. V.Genest & C.Genest, La loi de Newcomb-Benford ou la loi du premier chiffre significatif [2011](https://archimede.mat.ulaval.ca/amq/bulletins/mai11/Article_Genest.pdf)
