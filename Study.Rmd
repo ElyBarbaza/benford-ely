@@ -545,7 +545,7 @@ quatre.zero %>%
 
 
 
-# Discussions et Conclusion
+# Discussion et Conclusion
 
 Cette contradiction entre les résultats du chi-carré et ceux de la SSD pour les votes de Biden nous poussent à scruter les hypothèses de départ du premier test. En effet les intervalles de confiance, le chi-carrée et le z-statistique indique une possible irrégularité. Mais la mesure de la sommme des écarts aux carrées nous indique le contraire.
 

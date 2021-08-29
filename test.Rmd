@@ -5,6 +5,17 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
   md_document:
     variant: markdown_github
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 3
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  word_document:
+    toc: yes
+    toc_depth: '3'
 fig_width: 6
 fig_height: 4
 ---
