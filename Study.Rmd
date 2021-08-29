@@ -228,7 +228,7 @@ On remarque que les deux histogrammes ont une asymétrie avec un penchant extrê
 # Statistique descriptive
 
 
-Voici l'histogramme des votes du premier chiffre significatif de Trump et Biden. La figure est accompagné d'une ligne représentant un jeu de données ayant le même nombre d'observations mais avec les fréquences exactes de la loi de Benford.
+Voici l'histogramme des votes du premier chiffre significatif de Trump et Biden. La figure est accompagnée d'une ligne représentant un jeu de données ayant le même nombre d'observations mais avec les fréquences exactes de la loi de Benford.
 
 
 ```{r , echo=FALSE}
@@ -282,16 +282,12 @@ fig3
 
 
 
-A première vue les deux graphiques semblent globalement suivre le pattern de la loi de Benford.
-On aperçoit cependant de légers écarts. Sur le graphique de Trump, les chiffre 2 et 9 sont un peu en dessous des valeurs attendus. Et les chiffre 5,6 et 8 sont très légérement au dessus.
+A première vue les deux graphiques semblent globalement suivre le pattern de la loi de Benford. On aperçoit cependant de légers écarts. Sur le graphique de Trump, les chiffres 2 et 9 sont un peu en dessous des valeurs attendues. Les chiffres 5,6 et 8 quant à eux sont très légérement au dessus.
 
-Sur le graphique de Biden, les écarts sont plus forts que celle de Trump mais ceux-ci restent assez léger. Notamment avec le chiffre 4 qui est au dessus de la variable attendu. Les chiffres 5,7 et 9 eux sont faiblement en dessous.
-L'analyse visuelle du premier chiffre significatif ici ne montre pas une non-conformité à la LB. 
-Cependant, cette analyse ne démontre en rien la conformité à la LB.
+Sur le graphique de Biden, les écarts sont plus forts que ceux de Trump mais ceux-ci restent assez légers. Notamment avec le chiffre 4 qui est au-dessus de la variable attendue. Les chiffres 5,7 et 9 eux sont faiblement en dessous. L'analyse visuelle du premier chiffre significatif ici ne montre pas une non-conformité à la LB. Cependant, cette analyse ne démontre en rien la conformité à la LB.
 
-Nous passons maintenant à la visualisation du premier-deuxième chiffre significatif.
-Il est d'ailleurs suffisant d'uniquement d'analyser le premier-deuxième chiffre significatif. 
-Celui-ci contenant l'information des deux premiers chiffres significatifs :
+Nous passons maintenant à la visualisation du premier-deuxième chiffre significatif. 
+Il est d'ailleurs suffisant d'uniquement analyser le premier-deuxième chiffre significative, celui-ci contenant l'information des deux premiers chiffres significatifs :
 
 
 
@@ -340,44 +336,41 @@ fig4
 ```
 
 
-Ici encore, globalement on retrouve le pattern d'asymétrie à gauche de la loi de Benford. Cependant on remarque la présence de nombreux chiffres qui sont au dessus ou en dessous de leur valeur attendue.
+Ici encore, globalement on retrouve le pattern d'asymétrie à gauche de la loi de Benford. Cependant on remarque la présence de nombreux chiffres qui sont au-dessus ou en dessous de leur valeur attendue.
 
-Sur le graphique de Trump, une dizaine de chiffres dépasse la ligne. Les plus significatifs sont le 56,74,80,83,87, ces chiffres ont environ un tiers de trop. 
+Sur le graphique de Trump, une dizaine de chiffres dépasse la ligne. Les plus significatifs sont le 56,74,80,83,87, ces chiffres ont environ un tiers de trop.
 
-Une dizaine de chiffre se trouvent également en dessous de cette ligne. Les plus significatifs sont le 52,89 dont le nombre est quasiment diminué de moitié. On notera également les chiffres 33,63,78 qui se trouvent diminués d'environ un tiers.
+Une dizaine de chiffres se trouve également en dessous de cette ligne. Les plus significatifs sont le 52,89 dont le nombre est quasiment diminué de moitié. On notera également les chiffres 33,63,78 qui se trouvent diminués d'environ un tiers.
 
 Sur le graphique de Biden, une dizaine de chiffres dépasse la ligne. Les plus marquants sont le 43,59,82,89, dont on retrouve un tiers en trop.
 
-Et commme son homologue républicain, on retrouve encore une dizaine de chiffre en deça de la ligne. Cependant ici, un chiffre se démarque, le chiffre 94 qui n'est qu'à un tiers de son compte attendu.
-Les chiffres 52,55,77,86,88 ont eux moitié moins.
+Et comme son homologue républicain, on retrouve encore une dizaine de chiffres en deçà de la ligne. Cependant ici, un chiffre se démarque, le chiffre 94 qui n'est qu'à un tiers de son compte attendu. Les chiffres 52,55,77,86,88 ont eux moitié moins.
 
 
 
 # Méthodes
 
-Afin de répondre à nos problématiques de l'introduction, nous procéderons comme suit pour les données des deux candidats. :
+Afin de répondre à nos problématiques de l'introduction, nous procéderons comme suit pour les données des deux candidats :
 
 -Application des tests statistiques afin de vérifier si elles sont en désaccord avec la loi de Benford.
 -Application des tests statistiques permettant de mesurer leur distance comparé à la loi de Benford.
 
-Cette dichotomie entre ces deux objectifs est suggéré par Kossovsky [4]. En effet, selon lui, ces deux notions sont différentes et ont donc besoin d'être conceptuellement différenciés :
+Cette dichotomie entre ces deux objectifs est suggérée par Kossovsky [4]. En effet, selon lui, ces deux notions sont différentes et ont donc besoin d'être conceptuellement différenciées :
 
-Le terme de conformité répond de manière binaire (oui ou non) au fait de savoir si la donnée est Benford.
-C'est le test le plus courant effectué par les différents analystes dans la littérature.
-Nous choisirons ici d'utiliser parmi tout les tests de conformités disponibles, le test du chi2 de par son objectif qui aligné au notre. Mais aussi de par son abondance dans les études benfordienne similaires.
+Le terme de conformité répond de manière binaire (oui ou non) au fait de savoir si la donnée est Benford. C'est le test le plus courant effectué par les différents analystes dans la littérature. 
+Nous choisirons ici d'utiliser parmi tous les tests de conformité disponibles, le test du chi-carré de par son objectif qui est aligné au nôtre, mais aussi de par son abondance dans les études benfordiennes similaires.
 
 Voici la formule du chi2 : $\ Chi-Square= N*\sum \frac{(Observed - Theory)^2}{Theory}$
 
-La principale difficulté de celle-ci est de satisfaire les hypothèses sous-jacentes à son utilisation dans le contexte de la conformité. 
+La principale difficulté de celle-ci est de satisfaire les hypothèses sous-jacentes à son utilisation dans le contexte de la conformité.
 
-Le terme de comparaison lui intervient car tout les données de la vie réelle (non manipulées) ne se conforme pas à la loi de Benford. Ce terme se réfère à "un ensemble de données particulier avec sa propre configuration particulière". Et l'objectif est de déterminer à quel point la donnée est loin/proche de Benford.
+Le terme de comparaison lui intervient car toutes les données de la vie réelle (non manipulées) ne se conforment pas à la loi de Benford. Ce terme se réfère à "un ensemble de données particulier avec sa propre configuration particulière". L'objectif est de déterminer à quel point la donnée est loin/proche de Benford.
 
-Nous choisirons ici d'utiliser le SSD (somme des écarts au carré) en faveur du MAD (Moyenne des écarts absolus).
-Cela pour les deux raisons évoqués par Kossovsky [4] qui sont : une plus grande simplicité d'interprétation visuelle et une base mathématique plus simple. 
+Nous choisirons ici d'utiliser la SSD (somme des écarts au carré) en faveur de la MAD (Moyenne des écarts absolus). Cela pour les deux raisons évoquées par Kossovsky [4] qui sont : une plus grande simplicité d'interprétation visuelle et une base mathématique plus simple.
 
-La principale difficulté des tests de distances est de placer les seuils de tolérances. Cerqueti et Maggi [5] dans un récent article nous en proposent pour les chiffres significatifs qui nous intéressent (tableau 1). Ces derniers ont été trouvés grâce à des recherches sur des données de la vie réelle et mathématique abstraites.
+La principale difficulté des tests de distances est de placer les seuils de tolérance. Cerqueti et Maggi [5] dans un récent article nous en proposent pour les chiffres significatifs qui nous intéressent (tableau 1). Ces derniers ont été trouvés grâce à des recherches sur des données de la vie réelle et mathématiques abstraites.
 
-Voici comment est calculé le SSD :  $\ SSD = \sum((100) * Observed - (100) * Theory)^2 $
+Voici comment est calculée le SSD :  $\ SSD = \sum((100) * Observed - (100) * Theory)^2 $
 
 
 **Tableau 1 - Seuil de tolérance SSD**
@@ -390,16 +383,15 @@ Voici comment est calculé le SSD :  $\ SSD = \sum((100) * Observed - (100) * Th
 
 
 
-Enfin, le z-statistic test sera utilisé en complément du chi2. En effet, à l'opposée de ce dernier qui prend en compte tout les chiffres en même temps, le z test mesure chaque chiffre un à un. Son objectif est de tester si la fréquence d'un chiffre en particulier diffère significativement de ce qu'il est attendu sous la LDB. 
+Enfin, le z-statistic test sera utilisé en complément du chi-carré. En effet, à l'opposé de ce dernier qui prend en compte tous les chiffres en même temps, le test z mesure chaque chiffre un à un. Son objectif est de tester si la fréquence d'un chiffre en particulier diffère significativement de ce qui est attendu sous la LDB.
 
 Sa formule est la suivante :  $\ zstat = \frac{|Observed - Theory| - (1/2N)}{\sqrt\frac{Theory(1-Theory)}{N}} $
 
-Suivant la littérature (Nigrini [6], Grammatikos & Papanikolaou [7]) , ces seuils de tolérance sont appliqués afin de rejetter l'hypothèse nulle : 
-Une statistique z de : 2,57 indique une p-valeur de 0,01 ; 1,96 indique une p-valeur de 0,05 ; et 1,64 suggère une p-valeur de 0,10.
+Suivant la littérature (Nigrini [6], Grammatikos & Papanikolaou [7]) , ces seuils de tolérance sont appliqués afin de rejeter l'hypothèse nulle : Une statistique z de : 2,57 indique une p-valeur de 0,01 ; 1,96 indique une p-valeur de 0,05 ; et 1,64 suggère une p-valeur de 0,10.
 
 # Tests & Résultats 
 
-Voici l'application de ces tests aux premier, deuxième et premier-deuxième chiffre significatif :
+Voici l'application de ces tests aux premier, deuxième et premier-deuxième chiffres significatifs :
 
 
 ```{r , echo=FALSE}
@@ -436,7 +428,7 @@ biden_d12 = biden %>%
 ```
 
 
-Le tableau résumant les proportions empiriques et théoriques du premier chiffre significatif des deux candidats est ainsi obtenu ci-dessous. Les intervalles de confiance des valeurs théoriques sont dans le tableau en lieu et place des simples proportions théoriques. Ces intervalles de confiance ont été calculés grâce aux travaux de Nigrni & Mitteraier [8] avec un alpha égale à 0.05.
+Le tableau résumant les proportions empiriques et théoriques du premier chiffre significatif des deux candidats est ainsi obtenu ci-dessous. Les intervalles de confiance des valeurs théoriques sont dans le tableau en lieu et place des simples proportions théoriques. Ces intervalles de confiance ont été calculées grâce aux travaux de Nigrni & Mitteraier [8] avec un alpha égal à 0.05.
 
 
 **Tableau 2 - Valeurs théoriques et observés du premier CS pour Trump et Biden**
@@ -454,11 +446,10 @@ Le tableau résumant les proportions empiriques et théoriques du premier chiffr
 | **9**     | 0.051             |  [0.039 ; 0.053]         |  0.044             | 
 
 
-Les résultats du tableau 2, montre que toutes les valeurs de Trump sont bien comprises dans les valeurs théoriques attendues. 
-Ce n'est pas le cas pour Biden, en effet les chiffres 4 et 5 se trouvent en en dehors de leurs intervalles respectives.
+Les résultats du tableau 2 montrent que toutes les valeurs de Trump sont bien comprises dans les valeurs théoriques attendues. 
+Ce n'est pas le cas pour Biden, en effet les chiffres 4 et 5 se trouvent en dehors de leurs intervalles respectives.
 
-On procède alors à la réalisation du test de chi2 et de la mesure de SSD.
-On obtient les résultats suivants pour Trump :
+On procède alors à la réalisation du test de chi-carré et de la mesure de la SSD. On obtient les résultats suivants pour Trump :
 
 
 **Tableau 3 - Résultats du test statistique chi2 et de SSD de Trump**
@@ -470,15 +461,15 @@ On obtient les résultats suivants pour Trump :
 | **1ER-2ÈME**         | 101.968 (0.164)     |  89           | 3.502     |
 
 
-Le second chiffre significatif a la p-valeur la plus haute (0.84) suivit du premier chiffre (0.29) et du premier-deuxieme (0.164).
-On constate que l'hypothèse alternative du CHI2 pour les trois chiffes significatifs est assez largement rejeté. Les p-valeurs sont bien au dessus du seuil de 5%.
-Selon ce test, les données de Trump ne sont pas en désaccord avec la loi de Benford. 
+Le second chiffre significatif a la p-valeur la plus haute (0.84) suivi du premier chiffre (0.29) et du premier-deuxième (0.164). 
+On constate que l'hypothèse alternative du CHI2 pour les trois chiffres significatifs est assez largement rejetée. Les p-valeurs sont bien au-dessus du seuil de 5%. 
+Selon ce test, les données de Trump ne sont pas en désaccord avec la loi de Benford.
 
-Les valeurs du SSD des trois chiffres sont très petits. Le second est même inférieur à 2 (1.58) et selon la classification du tableau 3, il est considéré comme étant presque parfaitement Benford.
-Le premier et le premier-deuxième sont eux autour de 3 (respectivement 3.25 et 3.5), ils sont considéré comme assez proche et acceptable de Benford.
+Les valeurs de la SSD des trois chiffres sont très petites. Le second est même inférieur à 2 (1.58) et selon la classification du tableau 3, il est considéré comme étant presque parfaitement Benford. Le premier et le premier-deuxième sont eux autour de 3 (respectivement 3.25 et 3.5), ils sont considérés comme assez proches et acceptables de Benford.
 
-Les résultats du chi2 montre que les données de Trump ne sont pas en désaccord avec Benford. Mais que justement, et grâce au SSD, ceux-ci sont plutôt très proches de la loi.
-Cela suggère que les résultats d'éléctions de votes de Trump n'ont subi aucune manipulation/fraude détéctable par la loi de Benford.
+Les résultats du chi-carré montrent que les données de Trump ne sont pas en désaccord avec Benford. 
+Mais que justement, et grâce à la SSD, ceux-ci sont plutôt très proches de la loi. 
+Cela suggère que les résultats d'élections de votes de Trump n'ont subi aucune manipulation/fraude détectable par la loi de Benford.
 
 Les résultats de Biden sont les suivants :
 
@@ -493,11 +484,9 @@ Les résultats de Biden sont les suivants :
 
 
 
-Ici, on constate que l'hypothèse alternative du CHI2 pour le deuxième et premier-deuxième chiffes significatif est assez largement rejeté. Les p-valeurs sont bien au dessus du seuil de 5%.
-Cependant, le premier chiffre est rejeté par le test du chi2. En effet sa p-valeur est largement en dessous du seuil de 5%, et même du seuil de 1% (0.007).
-Selon ce test, les données de Biden pour le premier CS est en désaccord avec la loi de Benford. 
+Ici, on constate que l'hypothèse alternative du CHI2 pour le deuxième et premier-deuxième chiffres significatifs est assez largement rejetée. Les p-valeurs sont bien au-dessus du seuil de 5%. Cependant, le premier chiffre est rejeté par le test du chi-carré. En effet sa p-valeur est largement en dessous du seuil de 5%, et même du seuil de 1% (0.007). Selon ce test, les données de Biden pour le premier CS sont en désaccord avec la loi de Benford.
 
-Afin de tenter de déceler plus précisément quels chiffres seraient problématiques sur le premier CS, l'usage du z-statistique est effectué. 
+Afin de tenter de déceler plus précisément quels chiffres seraient problématiques sur le premier CS, l'usage du z-statistique est effectué.
 
 Voici les résultats du z-statistic obtenus sur le premier CS de Biden :
 
@@ -517,22 +506,15 @@ Voici les résultats du z-statistic obtenus sur le premier CS de Biden :
 | **9**     | 0.492       | 
 
 
-Selon les seuils précédemment décrit dans le chapitre Méthode, les chiffres 4 & 5 (respectivement 3.43 & 2.85) sont rejeté au seuil d'acceptance de 1%. 
-Ce sont les chiffres qui ont été visuellement remarqués sur la figure 3 et qui étaient en dehors des intervalles de confiances pour les valeur théoriques du tableau 2 . 
-Le 4 a environ 1.8% de plus que la proportion attendu et le 5 a 1.4% de moins que la proportion attendu. Rapportés à la valeur de chaque proportion théorique, les différences sont d'environ 16% et 18% respectivement.
+Selon les seuils précédemment décrits dans la partie Méthode, les chiffres 4 et 5 (respectivement 3.43 & 2.85) sont rejetés au seuil d'acceptance de 1%. Ce sont les chiffres qui ont été visuellement remarqués sur la figure 3 et qui étaient en dehors des intervalles de confiance pour les valeurs théoriques du tableau 2 . Le 4 a environ 1.8% de plus que la proportion attendue et le 5 a 1.4% de moins que la proportion attendue. Rapportés à la valeur de chaque proportion théorique, les différences sont d'environ 16% et 18% respectivement.
 
-Concernant les valeurs du SSD, on remarque comme pour ceux de Trump que les trois chiffres sont assez petits. En effet ils sont tous inférieurs à 7 (respectivement 6.22, 2.03 et 3.04). Selon la classification, ils sont considérés comme assez proche et donc acceptable pour la LBD.
+Concernant les valeurs du SSD, on remarque comme pour ceux de Trump que les trois chiffres sont assez petits. En effet ils sont tous inférieurs à 7 (respectivement 6.22, 2.03 et 3.04). Selon la classification, ils sont considérés comme assez proches et donc acceptables pour la LBD.
 
-Les résultats du chi2 et du SSD pour le premier chiffre sont assez contradictoires. Tandis que le premier rejette largement l'hypothèse nulle de conformité à Benford. Le deuxième montre que celle-ci est plutôt assez proche de Benford et est donc largement acceptable.
+Les résultats du chi-carré et de la SSD pour le premier chiffre sont assez contradictoires. Tandis que le premier rejette largement l'hypothèse nulle de conformité à Benford, le deuxième montre que celle-ci est plutôt assez proche de Benford et est donc largement acceptable.
 
-Selon l'analyse du premier chiffre par le chi2, les données du premier chiffre suggère une possible manipulation des données de Biden. 
-Cependant d'après le SSD, les données de celui-ci sont assez proche et sont donc largement acceptables par la LDB. 
-Cette contradiction nous amène à nous questionner sur les hypothèses de départ dans le cadre de l'utilisation de ces tests.
+Selon l'analyse du premier chiffre par le chi-carré, les données du premier chiffre suggèrent une possible manipulation des données de Biden. Cependant d'après la SSD, les données de celui-ci sont assez proches et sont donc largement acceptables par la LDB. Cette contradiction nous amène à nous questionner sur les hypothèses de départ dans le cadre de l'utilisation de ces tests.
 
-En regard des résultats du chi2, du z-statistique et des intervalles de confiance, les chiffres 4 & 5 du premier CS peut être sujettes à une investigation plus précises. 
-En passant à l'analyse du premier-deuxieme CS, on remarque que les chiffres 40,43,51,59 et 94 sont rejetés par la valeur critique du z-statistique.
-Les quatre premiers chiffres cités sont en cohérences avec les valeurs significatives des chiffres 4 & 5.
-Une recherche plus poussée concernant les procédures électorales des comtés en question peuvent être menés.
+En regard des résultats du chi-carré, du z-statistique et des intervalles de confiance, les chiffres 4 & 5 du premier CS peuvent être sujets à une investigation plus précise. En passant à l'analyse du premier-deuxième CS, on remarque que les chiffres 40,43,51,59 et 94 sont rejetés par la valeur critique du z-statistique. Les quatre premiers chiffres cités sont en cohérence avec les valeurs significatives des chiffres 4 et 5. Une recherche plus poussée concernant les procédures électorales des comtés en question peut être menée.
 
 
 
@@ -565,49 +547,20 @@ quatre.zero %>%
 
 # Discussions et Conclusion
 
-Cette contradiction entre les résultats du chi2 et ceux du SSD pour les votes de Biden nous pousse à scruter les
-hypothèses de départ du premier test. 
+Cette contradiction entre les résultats du chi-carré et ceux de la SSD pour les votes de Biden nous poussent à scruter les hypothèses de départ du premier test. En effet les intervalles de confiance, le chi-carrée et le z-statistique indique une possible irrégularité. Mais la mesure de la sommme des écarts aux carrées nous indique le contraire.
 
-Cette question, sous loi de Benford est très bien analysé et resumé par l'article de Kossovsky [4].
-Le test de chi2 est dans la littérature, reputé être assez "sensible"" sur les jeu de données à gros volume, à cause
-de son terme N. 
-Kossovsky conteste cette qualification de sensibilité. Pour lui, il est préférable de vérifier si les hypothèses
-sous-jacentes à celles-ci sont bien satisfaites dans le cadre Benfordien.
+Cette question est très bien débattue et résumée par l'article de Kossovsky [4]. L'auteur explique que le chi-carrée n'est pas adapté à une recherche de conformité sous loi de Benford. 
+En effet, ce test repose sur l'indépendence du set de données analysés. Les données de ce dernier doivent être sélectionnées de manière totalement aléatoire dans une population infinie. 
+Et cette population infinie doit respecter de manière parfaite la distribution sous laquelle la conformité est recherchée.
+Cependant la plupart des données de la vie réelle ne respecte pas ce procédé. 
 
-Et en effet, le chi2 repose sur l'hypothèse par lequel elle se réfère à un échantillon de taille N, pris au hasard
-dans une population infinie supposée posséder exactement la propriété de Benford. Le processus aléatoire de
-selection des N valeurs se fait de manière totalement indépendent les unes des autres. 
+Cette hypothèse non satisfaite, l'usage du chi-carré sur cette analyse semble être erroné. 
+Une mesure de distance semble être plus appropriée pour les données réelles comme conseillé par Kossovsky.
 
-Selon lui, en général, les données de la vie réelle ne suivent pas ce type de procédé. 
-D'une part, il est rare d'avoir en main une population parente infinie qui suivrait exactement la propriété de
-Benford et dont on pourrait sélectionner aléatoirement les valeurs N. 
-D'autre part, dans le cas où cette population existerait, les N valeurs de la vie réelle ne suivent presque jamais
-ce processus aléatoire de sélection. 
-Dans le cadre de cette donnée électorale, la population votantes états-uniennes n'est pas infini et ne suit pas de
-manière parfaitement exacte la LDB. 
-De plus les habitudes de votes des habitants sont hautements dépendants de facteurs tels que les campagnes
-électorales, le contexte de l'actualité, le contexte de la région etc...
+Comme vu précédemment, cette mesure place les données de Biden et de Trump comme étant largement Benford. 
+Il n'y a donc aucune raison d'émettre un doute sur une manipulation en défaveur des résultats de ce dernier.
 
-A la lumière de cette hypothèse d'échantillonage assez largement non satisfaite, l'usage du chi2 dans ce cadre
-électorale semble être erronée.
-Selon ce même auteur, une mesure de distance semble être plus approprié pour les données réelles. C'est le cas des
-données de cette éléction américaine.
-
-Tout les tests effectués n'ont permis d'établir aucun résultat significatif concernant les votes de Trump. Il n'y a
-aucune raison d'établir un doute sur une manipulation en défaveur des résultats de ce dernier.
-Concernant les résultats de Biden, les tests de conformités (chi2 et z-statistique) et les intervalles de confiance
-signalent un doute quant à quelques chiffres sur le premier CS. 
-Ces significances sont cependant nuancées par les résultats du SSD. Ce dernier indique largement que les données de
-Biden suivent assez bien la loi de Benford. 
-De plus, comme évoqués précedemment, le test du chi2 est de plus en plus controversé quant à son utilisation sur les
-données de la vie réelle. En effet, ces hypothèses de départ sont assez difficile à satisfaire pour ce type de
-donnée.
-
-Il n'y a donc aucune raison de corroborer les accusations de fraude électorales sur les données de Biden. La loi de
-Benford ici, ne nous permet d'indiquer une manipulation électorale ni sur Trump, ni sur Biden.
-De multiples interrogations reste quant à son l'utilisation pour détecter les fraudes électorales (voire [1]).
-Cependant, La LB qui ne que gagner en popularité ces dernières décennies de par sa curiosité mathématique et son
-application à la vie réelle. Elle n'est qu'à son crépuscule et son potentiel reste assez grand.
+La loi de Benford ici, ne nous permet pas d'indiqueé une manipulation électorale ni sur Trump, ni sur Biden. De plus, son utilisation pour détecter les fraudes électorales est assez controversé (voir [1]). Cependant, la LB ne fait que gagner en popularité ces dernières décennies de par sa curiosité mathématique et son application à la vie réelle. Elle n'est qu'à son crépuscule et son potentiel reste assez grand.
 
 
 
